@@ -61,4 +61,6 @@ function reload()
 end
 
 projectpath(p::Project, _) = projectpath(p)
-projectpath(p::Project) = string(lowercase(replace(p.name, r"[^A-Za-z0-9_-]" => "")), '/')
+projectpath(p::Project) =
+    string(lowercase(replace(p.org, r"[^A-Za-z0-9_-]" => "")), '/',
+           lowercase(replace(p.name, r"[^A-Za-z0-9_-]" => "")), '/')

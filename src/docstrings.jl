@@ -45,7 +45,7 @@ The resulting "project path components" take one of the following forms:
 
 | Platform | Project path form         |
 |----------|---------------------------|
-| Linux    | `"\$name"`                 |
+| Linux    | `"\$org/\$name"`            |
 | MacOS    | `"\$qualifier.\$org.\$name"` |
 | Windows  | `"\$org\\\$name"`           |
 """ Project
