@@ -10,7 +10,8 @@ struct Project
     org::AbstractString
     qualifier::AbstractString
 end
-Project(name::AbstractString; org::AbstractString="julia", qualifier::AbstractString="org") =
+
+Project(name::AbstractString; org::AbstractString="julia", qualifier::AbstractString="lang") =
     Project(name, org, qualifier)
 
 include("internals.jl")

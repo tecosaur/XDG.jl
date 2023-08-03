@@ -33,7 +33,7 @@ A representation of a "Project", namely the essential components of naming
 information used to produce platform-appropriate project paths.
 
     Project(name::AbstractString;
-            org::AbstractString="julia", qualifier::AbstractString="org")
+            org::AbstractString="julia", qualifier::AbstractString="lang")
       -> Project
 
 The information needed, and the platforms that make use of it, are as follows:
