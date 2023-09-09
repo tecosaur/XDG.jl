@@ -126,8 +126,11 @@ can be provided as arguments, in which case they are joined with the $name
 $dirterm as appropriate.
 $vardoc
 ## Keyword arguments
- - `create::Bool` (default `false`), whether the path should be created if it does not exist.
-   This takes care to create the base directories with the appropriate permissions ($(string(NEW_BASEDIR_MODE, base=8))).
+ - `create::Bool` (default `false`), whether the path should be created if it
+   does not exist. Paths ending in `$(Base.Filesystem.path_separator)` are interpreted as
+   directories, and all other paths are considered files. This takes care to
+   create the base directories with the appropriate permissions
+   ($(string(NEW_BASEDIR_MODE, base=8))).
 $existentkwarg"""
 end
 
