@@ -33,12 +33,24 @@ const NEW_BASEDIR_MODE = 0o700
 ensurebasedir(path::String) =
     isdir(path) || mkpath(path, mode=NEW_BASEDIR_MODE)
 
+const DIRECTORY_SUFFIX_FLAG = '/'
+
+"""
+    ensurepath(path::String)
+
+Ensure that `path` exists. Should `path` end with `$DIRECTORY_SUFFIX_FLAG` it is
+interpreted as a directory. The directory-suffix `$DIRECTORY_SUFFIX_FLAG` is
+used on all filesystems for consistency of the API, regardless of the native
+path seperator of the host filesystem.
+"""
 function ensurepath(path::String)
     if !ispath(path)
-        isdir(dirname(path)) ||
+        if endswith(path, DIRECTORY_SUFFIX_FLAG)
+            mkpath(path[begin:prevind(path, end)])
+        else
             mkpath(dirname(path))
-        isempty(basename(path)) || isfile(path) ||
             touch(path)
+        end
     end
 end
 
@@ -127,10 +139,9 @@ $dirterm as appropriate.
 $vardoc
 ## Keyword arguments
  - `create::Bool` (default `false`), whether the path should be created if it
-   does not exist. Paths ending in `$(Base.Filesystem.path_separator)` are interpreted as
+   does not exist. Paths ending in `$DIRECTORY_SUFFIX_FLAG` are interpreted as
    directories, and all other paths are considered files. This takes care to
-   create the base directories with the appropriate permissions
-   ($(string(NEW_BASEDIR_MODE, base=8))).
+   create the base directories with the appropriate permissions ($(string(NEW_BASEDIR_MODE, base=8))).
 $existentkwarg"""
 end
 
