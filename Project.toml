@@ -1,7 +1,7 @@
 name = "BaseDirs"
 uuid = "18cc8868-cbac-4acf-b575-c8ff214dc66f"
 authors = ["TEC <git@tecosaur.net>"]
-version = "1.1.2"
+version = "1.2.0"
 
 [compat]
 julia = "1.5"
