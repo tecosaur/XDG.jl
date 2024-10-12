@@ -75,8 +75,15 @@ function ensureexecutable(path::String)
     path
 end
 
+"""
+    PROMISED_NO_CONST_ASSIGNMENT
+
+Whether it is promised that no constant assignment will be made to a `BaseDirs`.
+"""
+PROMISED_NO_CONST_ASSIGNMENT::Bool = false
+
 function warn_if_precompiling()
-    if ccall(:jl_generating_output, Cint, ()) != 0
+    if ccall(:jl_generating_output, Cint, ()) != 0 && !PROMISED_NO_CONST_ASSIGNMENT
         @noinline (function ()
                        st = stacktrace(backtrace())
                        any(sf -> sf.func === :__init__, st) && return
@@ -88,6 +95,22 @@ function warn_if_precompiling()
                                 It is recommended that you invoke BaseDirs as required in
                                 function bodies, rather than at the top level. Calls are very
                                 cheap, and you can always pass the result of a live call around.
+
+                                If you have verified that this call was not assigned to a global constant,
+                                you can silence this warning with `BaseDirs.@promise_no_assign`.
+                                """ _module="BaseDirs" _file=String(naughtysf.file) _line=naughtysf.line
+                   end)()
+    end
+end
+
+function warn_misplaced_promise()
+    if ccall(:jl_generating_output, Cint, ()) == 0
+        @noinline (function ()
+                       st = stacktrace(backtrace())
+                       naughtyline = findfirst(sf -> sf.file != Symbol(@__FILE__), st)
+                       naughtysf = st[something(naughtyline, 1)]
+                       @warn """A `BaseDirs.@promise_no_assign` declaration has been evalated at runtime.
+                                This macro is explicitly intended for use during precompilation, and is likely misplaced.
                                 """ _module="BaseDirs" _file=String(naughtysf.file) _line=naughtysf.line
                    end)()
     end

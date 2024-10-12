@@ -6,7 +6,7 @@ module BaseDirs
               :CONFIG_DIRS, :BIN_HOME, :STATE_HOME, :CACHE_HOME, :RUNTIME_DIR,
               :DESKTOP_DIR, :DOWNLOAD_DIR, :DOCUMENTS_DIR, :PICTURES_DIR,
               :VIDEO_DIR, :TEMPLATE_DIR, :PUBLICSHARE_DIR, :APPLICATIONS_DIRS,
-              :FONTS_DIRS))
+              :FONTS_DIRS, Symbol("@promise_no_assign")))
 end
 
 include("variables.jl")
@@ -26,6 +26,46 @@ Project(name::AbstractString; org::AbstractString="julia", qualifier::AbstractSt
 include("internals.jl")
 
 using ..Internals
+
+"""
+    @promise_no_assign expr
+
+Evaluate `expr`, while promising that none of the results of
+`BaseDirs` will be assigned to any global constants.
+
+This macro is intended for use in other package's precompilation scripts, to
+suppress the spurious warnings about global constant assignments. It will itself
+warn when used outside precompilation.
+
+# Examples
+
+Within a precompilation workload:
+
+```julia
+BaseDirs.@promise_no_assign MyPkg.somecall()
+```
+
+Alternatively, you could mark a larger block as safe with `begin ... end`:
+
+```julia
+BaseDirs.@promise_no_assign begin
+    ...
+    MyPkg.somecall()
+    ...
+end
+```
+"""
+macro promise_no_assign(body)
+    quote
+        Internals.warn_misplaced_promise()
+        Internals.PROMISED_NO_CONST_ASSIGNMENT = true
+        try
+            $(esc(body))
+        finally
+            Internals.PROMISED_NO_CONST_ASSIGNMENT = false
+        end
+    end
+end
 
 include("access.jl")
 

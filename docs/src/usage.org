@@ -88,7 +88,6 @@ julia> BaseDirs.User.config(BaseDirs.Project("mything"), "config.conf", create=t
 #+end_src
 
 * Variables
-
 ** Base directories
 
 #+begin_src @docs
@@ -122,7 +121,6 @@ BaseDirs.FONTS_DIRS
 #+end_src
 
 * Functions
-
 ** User
 
 #+begin_src @docs
@@ -172,4 +170,44 @@ BaseDirs.data
 BaseDirs.config
 BaseDirs.fonts
 BaseDirs.applications
+#+end_src
+* Precompilation
+
+Since these directories are resolved using runtime information, as tempting and
+easy as it may be to include a snippet like this in your package:
+
+#+begin_src julia
+const MY_CACHE = BaseDirs.User.cache(BaseDirs.Project("MyPkg"))
+#+end_src
+
+When this is evaluated during precompilation, it "bakes in" the runtime
+environment at that particular point in time, making the result potentially
+invalid in the future (and no longer relocatable).
+
+In response to this risk, BaseDirs aggressively warns when calls that use
+runtime information are evaluated during precompilation. Excpect to see a
+message like this in response to any potential misuse:
+
+#+begin_src text
+┌ Warning: A base directory is being computed during precompilation.
+│ This is dangerous, as results depend on the live system configuration.
+│
+│ It is recommended that you invoke BaseDirs as required in
+│ function bodies, rather than at the top level. Calls are very
+│ cheap, and you can always pass the result of a live call around.
+│
+│ If you have verified that this call was not assigned to a global constant,
+│ you can silence this warning with BaseDirs.@promise_no_assign.
+└ @ BaseDirs ~/.julia/dev/MyPkg/src/MyPkg.jl:42
+#+end_src
+
+Note that the path displayed at the end of the warning
+(=~/.julia/dev/MyPkg/src/MyPkg.jl:42= in the example) identifies the suspicious
+callsite in =MyPkg=, rather than the line within BaseDirs that produces the
+warning. If you've checked how this call occurs and verified it's unfounded, you
+can suppress spurious warnings by wrapping the parent call in the precompilation
+workload with ~@promise_no_assign~.
+
+#+begin_src @docs
+BaseDirs.@promise_no_assign
 #+end_src
